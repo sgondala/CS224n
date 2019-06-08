@@ -16,7 +16,6 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-
 def pad_sents(sents, pad_token):
     """ Pad list of sentences according to the longest sentence in the batch.
     @param sents (list[list[str]]): list of sentences, where each sentence
@@ -27,15 +26,11 @@ def pad_sents(sents, pad_token):
         each sentences in the batch now has equal length.
     """
     sents_padded = []
-
-    ### YOUR CODE HERE (~6 Lines)
-
-
-    ### END YOUR CODE
-
+    max_length = max(*[len(s) for s in sents])
+    for s in sents:
+        s = s + [pad_token] * (max_length - len(s))
+        sents_padded.append(s)
     return sents_padded
-
-
 
 def read_corpus(file_path, source):
     """ Read file, where each sentence is dilineated by a `\n`.

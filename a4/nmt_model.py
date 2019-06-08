@@ -42,14 +42,14 @@ class NMT(nn.Module):
         self.vocab = vocab
 
         # default values
-        self.encoder = None 
-        self.decoder = None
-        self.h_projection = None
-        self.c_projection = None
-        self.att_projection = None
-        self.combined_output_projection = None
-        self.target_vocab_projection = None
-        self.dropout = None
+        self.encoder = nn.LSTM(embed_size, hidden_size, bias=True, bidirectional=true) 
+        self.decoder = nn.LSTMCell(embed_size, hidden_size, bias=True)
+        self.h_projection = nn.Linear(hidden_size, 2*hidden_size, bias=False)
+        self.c_projection = nn.Linear(hidden_size, 2*hidden_size, bias=False)
+        self.att_projection = nn.Linear(hidden_size, 2*hidden_size, bias=False)
+        self.combined_output_projection = nn.Linear(hidden_size, 3*hidden_size, bias=False)
+        self.target_vocab_projection = nn.Linear(len(vocab.tgt), hidden_size, bias=False)
+        self.dropout = nn.Dropout()
 
 
         ### YOUR CODE HERE (~8 Lines)
