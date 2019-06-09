@@ -43,12 +43,12 @@ class NMT(nn.Module):
 
         # default values
         self.encoder = nn.LSTM(embed_size, hidden_size, bias=True, bidirectional=True) 
-        self.decoder = nn.LSTMCell(embed_size, hidden_size, bias=True)
+        self.decoder = nn.LSTMCell(embed_size + hidden_size, hidden_size, bias=True)
         self.h_projection = nn.Linear(2*hidden_size, hidden_size, bias=False)
         self.c_projection = nn.Linear(2*hidden_size, hidden_size, bias=False)
         self.att_projection = nn.Linear(2*hidden_size, hidden_size, bias=False)
-        self.combined_output_projection = nn.Linear(hidden_size, 3*hidden_size, bias=False)
-        self.target_vocab_projection = nn.Linear(len(vocab.tgt), hidden_size, bias=False)
+        self.combined_output_projection = nn.Linear(3*hidden_size, hidden_size, bias=False)
+        self.target_vocab_projection = nn.Linear(hidden_size, len(vocab.tgt), bias=False)
         self.dropout = nn.Dropout()
 
 
@@ -218,7 +218,7 @@ class NMT(nn.Module):
             o_prev = o_t
 
         combined_outputs = torch.stack(combined_outputs)
-        
+
         ### YOUR CODE HERE (~9 Lines)
         ### TODO:
         ###     1. Apply the attention projection layer to `enc_hiddens` to obtain `enc_hiddens_proj`,
@@ -290,6 +290,10 @@ class NMT(nn.Module):
 
         combined_output = None
 
+        dec_state = self.decoder(Ybar_t, dec_state)
+        dec_hidden, dec_cell = dec_state
+        e_t = torch.squeeze(torch.bmm(enc_hiddens_proj, torch.unsqueeze(dec_hidden, 2)))
+
         ### YOUR CODE HERE (~3 Lines)
         ### TODO:
         ###     1. Apply the decoder to `Ybar_t` and `dec_state`to obtain the new dec_state.
@@ -319,6 +323,15 @@ class NMT(nn.Module):
         # Set e_t to -inf where enc_masks has 1
         if enc_masks is not None:
             e_t.data.masked_fill_(enc_masks.byte(), -float('inf'))
+
+        alpha_t = torch.nn.functional.softmax(e_t, 1)
+        a_t = torch.squeeze(torch.bmm(torch.unsqueeze(alpha_t,1), enc_hiddens))
+        U_t = torch.cat((a_t, dec_hidden), 1)
+        V_t = self.combined_output_projection(U_t)
+        O_t = torch.tanh(V_t)
+        # print("Ot", O_t)
+        O_t = self.dropout(O_t)
+        # print("Ot", O_t)
 
         ### YOUR CODE HERE (~6 Lines)
         ### TODO:
