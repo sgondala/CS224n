@@ -206,6 +206,19 @@ class NMT(nn.Module):
         # Initialize a list we will use to collect the combined output o_t on each step
         combined_outputs = []
 
+
+        enc_hiddens_proj =  self.att_projection(enc_hiddens)
+        Y = self.model_embeddings.target(target_padded)
+        
+        for Y_t in torch.split(Y, 1):
+            Y_t = torch.squeeze(Y_t)
+            Ybar_t = torch.cat((Y_t, o_prev), 1)
+            dec_state, o_t, et = self.step(Ybar_t, dec_state, enc_hiddens, enc_hiddens_proj, enc_masks)
+            combined_outputs.append(o_t)
+            o_prev = o_t
+
+        combined_outputs = torch.stack(combined_outputs)
+        
         ### YOUR CODE HERE (~9 Lines)
         ### TODO:
         ###     1. Apply the attention projection layer to `enc_hiddens` to obtain `enc_hiddens_proj`,
