@@ -42,11 +42,11 @@ class NMT(nn.Module):
         self.vocab = vocab
 
         # default values
-        self.encoder = nn.LSTM(embed_size, hidden_size, bias=True, bidirectional=true) 
+        self.encoder = nn.LSTM(embed_size, hidden_size, bias=True, bidirectional=True) 
         self.decoder = nn.LSTMCell(embed_size, hidden_size, bias=True)
-        self.h_projection = nn.Linear(hidden_size, 2*hidden_size, bias=False)
-        self.c_projection = nn.Linear(hidden_size, 2*hidden_size, bias=False)
-        self.att_projection = nn.Linear(hidden_size, 2*hidden_size, bias=False)
+        self.h_projection = nn.Linear(2*hidden_size, hidden_size, bias=False)
+        self.c_projection = nn.Linear(2*hidden_size, hidden_size, bias=False)
+        self.att_projection = nn.Linear(2*hidden_size, hidden_size, bias=False)
         self.combined_output_projection = nn.Linear(hidden_size, 3*hidden_size, bias=False)
         self.target_vocab_projection = nn.Linear(len(vocab.tgt), hidden_size, bias=False)
         self.dropout = nn.Dropout()
@@ -131,6 +131,15 @@ class NMT(nn.Module):
         """
         enc_hiddens, dec_init_state = None, None
 
+        X = self.model_embeddings.source(source_padded)
+        packed_sequence = torch.nn.utils.rnn.pack_padded_sequence(X, source_lengths)
+        enc_hiddens, (last_hidden, last_cell) = self.encoder(packed_sequence)
+        enc_hiddens = torch.nn.utils.rnn.pad_packed_sequence(enc_hiddens)[0]
+        enc_hiddens = enc_hiddens.permute(1,0,2)
+        concat_last_hidden = torch.cat((last_hidden[0], last_hidden[1]), 1)
+        concat_last_cell = torch.cat((last_cell[0], last_cell[1]), 1)
+        dec_init_state = (self.h_projection(concat_last_hidden), self.c_projection(concat_last_cell))
+        
         ### YOUR CODE HERE (~ 8 Lines)
         ### TODO:
         ###     1. Construct Tensor `X` of source sentences with shape (src_len, b, e) using the source model embeddings.
