@@ -26,7 +26,7 @@ def pad_sents(sents, pad_token):
         each sentences in the batch now has equal length.
     """
     sents_padded = []
-    max_length = max(*[len(s) for s in sents])
+    max_length = max([len(s) for s in sents])
     for s in sents:
         s = s + [pad_token] * (max_length - len(s))
         sents_padded.append(s)
