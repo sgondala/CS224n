@@ -56,31 +56,6 @@ class ParserModel(nn.Module):
         self.hidden_to_logits = nn.Linear(self.hidden_size, n_classes, bias=True)
         nn.init.xavier_uniform_(self.hidden_to_logits.weight)
 
-        ### YOUR CODE HERE (~5 Lines)
-        ### TODO:
-        ###     1) Construct `self.embed_to_hidden` linear layer, initializing the weight matrix
-        ###         with the `nn.init.xavier_uniform_` function with `gain = 1` (default)
-        ###     2) Construct `self.dropout` layer.
-        ###     3) Construct `self.hidden_to_logits` linear layer, initializing the weight matrix
-        ###         with the `nn.init.xavier_uniform_` function with `gain = 1` (default)
-        ###
-        ### Note: Here, we use Xavier Uniform Initialization for our Weight initialization.
-        ###         It has been shown empirically, that this provides better initial weights
-        ###         for training networks than random uniform initialization.
-        ###         For more details checkout this great blogpost:
-        ###             http://andyljones.tumblr.com/post/110998971763/an-explanation-of-xavier-initialization 
-        ### Hints:
-        ###     - After you create a linear layer you can access the weight
-        ###       matrix via:
-        ###         linear_layer.weight
-        ###
-        ### Please see the following docs for support:
-        ###     Linear Layer: https://pytorch.org/docs/stable/nn.html#torch.nn.Linear
-        ###     Xavier Init: https://pytorch.org/docs/stable/nn.html#torch.nn.init.xavier_uniform_
-        ###     Dropout: https://pytorch.org/docs/stable/nn.html#torch.nn.Dropout
-
-
-        ### END YOUR CODE
 
     def embedding_lookup(self, t):
         """ Utilize `self.pretrained_embeddings` to map input `t` from input tokens (integers)
@@ -101,21 +76,6 @@ class ParserModel(nn.Module):
         intermediate = self.pretrained_embeddings(t)
         x = intermediate.view(intermediate.shape[0], -1)
         return x
-        ### YOUR CODE HERE (~1-3 Lines)
-        ### TODO:
-        ###     1) Use `self.pretrained_embeddings` to lookup the embeddings for the input tokens in `t`.
-        ###     2) After you apply the embedding lookup, you will have a tensor shape (batch_size, n_features, embedding_size).
-        ###         Use the tensor `view` method to reshape the embeddings tensor to (batch_size, n_features * embedding_size)
-        ###
-        ### Note: In order to get batch_size, you may need use the tensor .size() function:
-        ###         https://pytorch.org/docs/stable/tensors.html#torch.Tensor.size
-        ###
-        ###  Please see the following docs for support:
-        ###     Embedding Layer: https://pytorch.org/docs/stable/nn.html#torch.nn.Embedding
-        ###     View: https://pytorch.org/docs/stable/tensors.html#torch.Tensor.view
-
-
-        ### END YOUR CODE
 
 
     def forward(self, t):
@@ -145,19 +105,3 @@ class ParserModel(nn.Module):
         after_dropout = self.dropout(h)
         output = self.hidden_to_logits(after_dropout)
         return output
-        ###  YOUR CODE HERE (~3-5 lines)
-        ### TODO:
-        ###     1) Apply `self.embedding_lookup` to `t` to get the embeddings
-        ###     2) Apply `embed_to_hidden` linear layer to the embeddings
-        ###     3) Apply relu non-linearity to the output of step 2 to get the hidden units.
-        ###     4) Apply dropout layer to the output of step 3.
-        ###     5) Apply `hidden_to_logits` layer to the output of step 4 to get the logits.
-        ###
-        ### Note: We do not apply the softmax to the logits here, because
-        ### the loss function (torch.nn.CrossEntropyLoss) applies it more efficiently.
-        ###
-        ### Please see the following docs for support:
-        ###     ReLU: https://pytorch.org/docs/stable/nn.html?highlight=relu#torch.nn.functional.relu
-
-
-        ### END YOUR CODE

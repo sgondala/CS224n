@@ -60,8 +60,6 @@ class PartialParse(object):
 			self.dependencies.append((self.stack[-2], self.stack[-1]))
 			self.stack = self.stack[:-1]
 
-		### END YOUR CODE
-
 	def parse(self, transitions):
 		"""Applies the provided transitions to this PartialParse
 
@@ -106,23 +104,6 @@ def minibatch_parse(sentences, model, batch_size):
 			unfinished_parses = [parse for parse in unfinished_parses if len(parse.buffer) != 0 or len(parse.stack) != 1]
 		dependencies.extend([x.dependencies for x in partial_parses])
 		
-	### YOUR CODE HERE (~8-10 Lines)
-	### TODO:
-	###     Implement the minibatch parse algorithm as described in the pdf handout
-	###
-	###     Note: A shallow copy (as denoted in the PDF) can be made with the "=" sign in python, e.g.
-	###                 unfinished_parses = partial_parses[:].
-	###             Here `unfinished_parses` is a shallow copy of `partial_parses`.
-	###             In Python, a shallow copied list like `unfinished_parses` does not contain new instances
-	###             of the object stored in `partial_parses`. Rather both lists refer to the same objects.
-	###             In our case, `partial_parses` contains a list of partial parses. `unfinished_parses`
-	###             contains references to the same objects. Thus, you should NOT use the `del` operator
-	###             to remove objects from the `unfinished_parses` list. This will free the underlying memory that
-	###             is being accessed by `partial_parses` and may cause your code to crash.
-
-
-	### END YOUR CODE
-
 	return dependencies
 
 
