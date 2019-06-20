@@ -192,24 +192,15 @@ class NMT(nn.Module):
 
         dec_state = self.decoder(Ybar_t, dec_state)
         dec_hidden, dec_cell = dec_state
-        # print("Enc hiddens", enc_hiddens_proj.shape)
         e_t = torch.bmm(enc_hiddens_proj, torch.unsqueeze(dec_hidden, 2))
-        # print("Et one", e_t.shape)
         e_t = torch.squeeze(e_t, 2)
-        # if(len(e_t.shape) == 1):
-        #    e_t = torch.unsqueeze(e_t, 0)
-            
-
 
         # Set e_t to -inf where enc_masks has 1
         if enc_masks is not None:
             e_t.data.masked_fill_(enc_masks.byte(), -float('inf'))
 
-        # print("Et 2", e_t.shape)
         alpha_t = torch.nn.functional.softmax(e_t, 1)
         a_t = torch.squeeze(torch.bmm(torch.unsqueeze(alpha_t,1), enc_hiddens), 1)
-        #if(len(a_t.shape) == 1):
-        #    a_t = torch.unsqueeze(a_t, 0)
         U_t = torch.cat((a_t, dec_hidden), 1)
         V_t = self.combined_output_projection(U_t)
         O_t = torch.tanh(V_t)
